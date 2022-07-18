@@ -1,7 +1,7 @@
 const http = require('http');
 const Koa = require('koa');
 const Router = require('koa-router');
-const cors = require('koa2-cors');
+const cors = require('@koa/cors');
 const koaBody = require('koa-body');
 
 const app = new Koa();
@@ -10,7 +10,6 @@ app.use(cors());
 app.use(koaBody({json: true}));
 
 let posts = [];
-let nextId = 1;
 
 const router = new Router();
 
@@ -19,15 +18,10 @@ router.get('/posts', async (ctx, next) => {
 });
 
 router.post('/posts', async(ctx, next) => {
-    const {id, content} = ctx.request.body;
-
-    if (id !== 0) {
-        posts = posts.map(o => o.id !== id ? o : {...o, content: content});
-        ctx.response.status = 204;
-        return;
-    }
-
-    posts.push({...ctx.request.body, id: nextId++, created: Date.now()});
+    const { id, content } = ctx.request.body;
+    console.log(ctx.request.body);
+    let index = posts.findIndex(el => el.id === id);
+    index !== -1 ? posts[index].content = content : posts.unshift(ctx.request.body);
     ctx.response.status = 204;
 });
 
